@@ -33,7 +33,7 @@ After a series of debugging sessions related to networking and memory allocation
 
 ```mermaid
 graph TD
-    A[Your Computer (Host)] -->|docker-compose up| B(Docker Container: spark-lab-final);
+    A[Your Computer (Host)] -->|"docker-compose up"| B(Docker Container: spark-lab-final);
     subgraph B
         C[Jupyter Lab]
         D[Apache Spark (Local Mode [*])]
