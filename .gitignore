@@ -1,0 +1,9 @@
+# Ignorar a pasta com todos os datasets
+data/
+
+# Arquivos de cache do Python
+__pycache__/
+*.pyc
+
+# Arquivos de checkpoint do Jupyter Notebook
+.ipynb_checkpoints/
