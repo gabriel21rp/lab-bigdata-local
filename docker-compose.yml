@@ -93,7 +93,7 @@ services:
     depends_on:
       - spark-master
     environment:
-      - JUPYTER_TOKEN=sunasu
+      - JUPYTER_TOKEN=minhasenha123
     networks:
       - spark-net
 
