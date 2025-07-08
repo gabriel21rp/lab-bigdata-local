@@ -1,47 +1,41 @@
 # Project: Local Big Data Laboratory with Docker and Spark
 
-This repository documents the creation and testing of a local Big Data environment, designed to analyze the performance of Apache Spark under different workload scenarios, file formats, and resource configurations.
+This repository documents the creation and testing of a local Big Data environment designed to analyze Apache Spark's performance across different workloads, file formats, and resource configurations.
 
-**Author:** [YOUR NAME HERE]
+**Author:** [Gabriel Pacheco]
 **Date:** July 2025
 
 ---
 
 ## 🎯 Objective
 
-The main objective of this project was to build a self-contained and reproducible distributed data processing environment using Docker. From this environment, practical tests were conducted to evaluate and compare:
+The primary goal was to build a self-contained, reproducible data processing environment using Docker. Within this environment, practical benchmark tests were conducted to evaluate and compare:
 
-1.  The impact of **file format** (CSV, JSON, Parquet) on reading and processing performance.
-2.  The **scalability of processing** in relation to data volume.
-3.  **Hardware scalability** by simulating processing with a single CPU core versus multiple cores.
+1.  The performance impact of different **file formats** (CSV, JSON, Parquet).
+2.  The processing **scalability** in relation to data volume.
+3.  Hardware resource scalability by simulating processing on a **single CPU core versus multiple cores**.
 
 ---
 
 ## 🛠️ Environment Architecture
 
-After a series of debugging sessions related to networking and memory allocation issues in a multi-node architecture, the final and stable architecture adopted was a **single-container setup with Spark in local mode**.
+After debugging networking and memory allocation issues in a multi-node setup, the final, stable architecture is a **single-container solution running Spark in local mode**.
 
-* **Docker & Docker Compose:** Used to create and manage the environment declaratively.
-* **Docker Image:** `jupyter/all-spark-notebook:latest`, a complete image containing:
-    * Jupyter Lab: For interactive development in Python.
-    * Apache Spark: Pre-installed and configured to run in local mode.
-    * Pandas and other Data Science libraries.
-* **Spark UI:** The Spark monitoring interface, accessible to track running jobs.
-* **Volume Mapping:** The local folders `./data` and `./notebooks` are mapped into the container, allowing for a persistent workflow.
+* **Docker & Docker Compose:** Used to declaratively build and manage the environment.
+* **Docker Image:** `jupyter/all-spark-notebook:latest`, a comprehensive image containing Jupyter Lab, a full Apache Spark installation, Pandas, and other data science libraries.
+* **Spark UI:** The monitoring interface used to track running jobs.
+* **Volume Mapping:** Local folders (`./data` and `./notebooks`) are mapped into the container for a persistent and seamless workflow.
 
 ### Architecture Diagram
 
 ```mermaid
 graph TD
-    A[Your Computer "Host"] -->|"docker-compose up"| B(Docker Container: spark-lab-final);
+    A["Host Machine"] -- "docker-compose up" --> B(Docker Container);
     subgraph B
-        C[Jupyter Lab]
-        D[Apache Spark (Local Mode [*])]
-        E[Container Filesystem]
+        C[Jupyter Lab] --> D[Apache Spark Engine];
     end
-    A -- ./notebooks --> E;
-    A -- ./data --> E;
-    C --> D;
+    A -- "Shared Folder: ./data" --> E[Container Filesystem];
+    A -- "Shared Folder: ./notebooks" --> E;
     style B fill:#f9f,stroke:#333,stroke-width:2px
 ```
 
@@ -50,7 +44,7 @@ graph TD
 ## 📋 Prerequisites
 
 * [Docker](https://www.docker.com/products/docker-desktop/)
-* [Docker Compose](https://docs.docker.com/compose/install/) (usually included with Docker Desktop)
+* [Docker Compose](https://docs.docker.com/compose/install/)
 * [Git](https://git-scm.com/)
 
 ---
@@ -63,30 +57,30 @@ graph TD
     cd lab-bigdata-local
     ```
 
-2.  **Add your data:** Place your data files (CSV, JSON, etc.) in the `/data` folder. *(Note: This folder is in the `.gitignore` and is not versioned).*
+2.  **Add data files:** Place your datasets in the `/data` folder. *(Note: This folder is specified in `.gitignore` and will not be committed to the repository).*
 
 3.  **Start the environment:**
     ```bash
     docker-compose up -d
     ```
 
-4.  **Access the Services:**
+4.  **Access Services:**
     * **Jupyter Lab:** `http://localhost:8888` (password: `padrao`)
-    * **Spark UI:** `http://localhost:4040` (becomes active when a Spark job is running)
+    * **Spark UI:** `http://localhost:4040` (active during Spark job execution)
 
 ---
 
 ## 🔬 Performance Tests and Results Analysis
 
-The notebook `notebooks/testes_desempenho.ipynb` was executed to perform an automated benchmark, testing different types of operations (aggregation, join, etc.) on all data files. Below are the consolidated results for the **Complex Aggregation** operation.
+The notebook `notebooks/testes_desempenho.ipynb` contains an automated benchmark script to test various operations. The results below are consolidated for the **Complex Aggregation** task.
 
 ### Analysis 1: Impact of File Format
 
-The table below shows the execution time to read and process files of different formats and sizes.
+This test measured the time to read and process datasets of varying sizes and formats.
 
 **[PASTE THE RESULTS TABLE GENERATED BY YOUR NOTEBOOK HERE]**
 
-*Example of how the table can be formatted in Markdown:*
+*Example Markdown Table:*
 | file | format | rows | test_type | execution_time_s |
 | :--- | :--- | ---:| :--- | ---:|
 | convertido_5M.csv | csv | 5000000 | Complex Aggregation | **XX.XXXX** |
@@ -94,36 +88,15 @@ The table below shows the execution time to read and process files of different 
 | convertido_5M.parquet | parquet | 5000000 | Complex Aggregation | **Z.ZZZZ** |
 
 **Analysis Conclusion:**
-The results clearly demonstrate the superiority of the Parquet format. For the 5-million-row dataset, Parquet was **[Calculate and insert: XX/Z]** times faster than CSV and **[Calculate and insert: YY/Z]** times faster than JSON. This is because Parquet is a columnar format optimized for analytics, allowing Spark to read only the necessary columns (`categoria` and `valor`) and benefit from compression and metadata, whereas CSV and JSON require a full read and parsing of the text file.
+The results clearly demonstrate the superiority of the Parquet format. For the 5-million-row dataset, Parquet was **[Calculate and insert: XX/Z]** times faster than CSV and **[Calculate and insert: YY/Z]** times faster than JSON. This is because Parquet is a columnar format optimized for analytics. It allows Spark to read only the necessary columns and benefits from efficient compression and metadata storage, whereas text-based formats like CSV and JSON require full parsing.
 
 ### Analysis 2: CPU Scalability (Multi-core vs. Single-core)
 
-A second benchmark was run comparing the execution in `local[*]` mode (all cores) versus `local[1]` mode (a single core) for the `convertido_5000000.parquet` file.
+A second benchmark compared the execution in `local[*]` mode (all available cores) versus `local[1]` mode (a single core) for the `convertido_5000000.parquet` file.
 
 **[PASTE THE TIME COMPARISON HERE]**
 
 *Example:*
 | Mode | Execution Time (s) |
 | :--- | ---:|
-| `local[*]` (8 cores) | **A.AAAA** |
-| `local[1]` (1 core) | **B.BBBB** |
-
-**Analysis Conclusion:**
-Using multiple cores resulted in a performance improvement of **[Calculate and insert: (B-A)/B * 100]%**. This proves Spark's ability to efficiently parallelize tasks even in local mode, distributing the work among available CPU cores to accelerate processing.
-
----
-
-## 🎓 Key Learnings
-
-* **Importance of Data Format:** The choice of file format (Parquet) is one of the most impactful optimization factors in a Big Data pipeline.
-* **Complexity of Distributed Environments:** The initial attempt to create a multi-node cluster revealed several configuration challenges (networking, memory, architecture, permissions) that are common in production environments.
-* **Value of Local Mode:** For development, prototyping, and many benchmark scenarios, Spark's local mode (`local[*]`) is a robust, stable alternative that drastically simplifies the infrastructure.
-* **Version Control Best Practices:** The need to use `.gitignore` to exclude raw data is fundamental to maintaining the health and performance of a code repository.
-
----
-
-## 🔮 Next Steps
-
-* Integrate the environment with a streaming system like Apache Kafka for real-time processing.
-* Explore more advanced performance optimizations in Spark, such as data partitioning and the Catalyst optimizer.
-* Re-attempt the implementation of the multi-node architecture with a different set of Docker images or in a cloud environment.
+| `local[*]` (Multi-core) | **A.AAAA**
